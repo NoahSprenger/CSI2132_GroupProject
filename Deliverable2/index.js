@@ -19,6 +19,16 @@ app.get('/', (req, res) => {
     res.render('index.njk', {index: true, title: 'Home'});
 });
 
+app.get('/rooms', (req, res) => {
+    db.query('SELECT * FROM rooms', (err, result) => {
+        if (err) {
+            res.status(401);
+        } else {
+            res.render('rooms.njk', {rooms: true, title: 'Rooms', rooms: result});
+        }
+    });
+});
+
 // Local Testing
 app.listen(3000, function(){
     console.log("Node application started");
