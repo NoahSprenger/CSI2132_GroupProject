@@ -4,10 +4,9 @@
         <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
         <meta name="color-scheme" content="light dark">
         <!-- Bootstrap 5 CSS -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
         {% block css %}
         {% endblock %}
         {% if title %}
@@ -18,54 +17,45 @@
         {% block styling %}{% endblock%}
     </head>
     <!-- change the onload function to index.html -->
-    <body onload="sloganTyper()">
-        <nav class="navbar navbar-expand-lg navbar-dark nav-custom">
-            <a class="navbar-brand text-light" style="font-size:200%; text-transform:uppercase;" href="/">Spotter</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+    <body>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">CyberStay</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item dropdown" style="padding-right: 20px;">
-                        <a class="nav-link dropdown-toggle text-light" style="font-size:150%;" href="#" role="button" id="dropdownMenuSpots" data-toggle="dropdown" aria-expanded="false">
-                            Spots
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuSpots">
-                            <li><a href="/Add" class="dropdown-item" role="button">Accommodations</a></li>
-                            <li><a href="/About" class="dropdown-item" role="button">About</a></li>
-                            <li><a href="/Support" class="dropdown-item" role="button">Contact Us</a></li>
-                        </ul>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="/">Home</a>
                     </li>
-                    <li class="nav-item dropdown" style="padding-right: 20px;">
-                        <a class="nav-link dropdown-toggle text-light" style="font-size:150%" href="#" role="button" id="dropdownMenuAccount" data-toggle="dropdown" aria-expanded="false">
-                            Account
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuAccount">
-                            <li><a href="/login" class="dropdown-item" role="button">Login</a></li>
-                            <li><a href="/logout" class="dropdown-item" role="button">Logout</a></li>
-                            <li><a href="/Profile" class="dropdown-item" role="button">My Account</a></li>
-                        </ul>
+                    <li class="nav-item">
+                    <a class="nav-link" href="/About">About</a>
                     </li>
-	        </ul>
+                    <li class="nav-item">
+                    <a class="nav-link" href="/Services">Services</a>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link" href="/Contact">Contact</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Login">Login</a>
+                    </li>
+                </ul>
             </div>
+        </div>
         </nav>
-        {% if index %}
-            {% block main %}{% endblock %}
-        {% else %}
-            {% block content %}{% endblock %}
-        {% endif %}
+        {% block main %}{% endblock %}
         {% block endScripts %}{% endblock %}
     </body>
     <footer class="mt-auto">
-        <div class="row" style="padding-left: 5%;">
-            <div class="col-lg-4">
-                <h3 style="text-decoration: underline; color: ghostwhite;">If you bring it to the spot then it leaves with you.</h3>
-            </div>
-            <div class="col-lg-4">
-                <h3 style="color: ghostwhite;">Respect all relevant laws and property boundaries.</h3>
-            </div>
-            <div class="col-lg-4">
-                <h3 style="color: ghostwhite;">Instagram: noahsphotos.15</h3>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="footer">
+                        <p class="text-center">&copy; 2023 CyberStay</p>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>

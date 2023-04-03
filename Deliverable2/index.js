@@ -16,20 +16,38 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(useragent.express())
 
 app.get('/', (req, res) => {
-    res.render('index.njk', {index: true, title: 'Home'});
+    res.render('index.njk', {title: 'Home'});
 });
 
-app.get('/rooms', (req, res) => {
-    db.query('SELECT * FROM rooms', (err, result) => {
-        if (err) {
-            res.status(401);
-        } else {
-            res.render('rooms.njk', {rooms: true, title: 'Rooms', rooms: result});
-        }
-    });
+app.get('/Booking', (req, res) => {
+    res.render('booking.njk', {title: 'Booking'});
+});
+
+app.get('/About', (req, res) => {
+    res.render('about.njk', {title: 'About'});
+});
+
+app.get('/Contact', (req, res) => {
+    res.render('contact.njk', {title: 'Contact'});
+});
+
+app.get('/Services', (req, res) => {
+    res.render('services.njk', {title: 'Services'});
+});
+
+app.get('/Login', (req, res) => {
+    res.render('login.njk', {title: 'Login'});
+});
+
+app.get('/SignUp', (req, res) => {
+    res.render('signup.njk', {title: 'Sign Up'});
+});
+
+app.get('/ResetPassword', (req, res) => {
+    res.render('resetpassword.njk', {title: 'Reset Password'});
 });
 
 // Local Testing
 app.listen(3000, function(){
-    console.log("Node application started");
+    console.log("Node application started localhost:3000");
 });

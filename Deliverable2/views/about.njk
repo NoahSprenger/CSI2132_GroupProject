@@ -1,0 +1,30 @@
+{% extends "base.njk" %}
+{% block css %}
+<link rel="stylesheet" href="css/index.css">
+{% endblock css %}
+{% block styling %}
+    <style>
+      .about-description p {
+        line-height: 1.5;
+      }
+      .about-description img {
+        max-width: 100%;
+      }
+    </style>
+{% endblock styling %}
+{% block main %}
+    <div class="container my-5">
+      <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+          <h2 class="text-center mb-5">About CyberStay</h2>
+          <div class="about-description">
+            <p>CyberStay was created by Sattar Abdul, Noah Sprenger, and Sasha Berman. We are a team of passionate individuals who believe that finding the perfect hotel should be easy and stress-free. We noticed that there are many hotel booking websites out there, but none of them seem to offer a truly personalized experience.</p>
+            <p>Our goal is to connect major hotel companies with travellers who want a quality hotel based on their needs. We believe that every traveller deserves a hotel that meets their unique preferences and budget, and we're here to make that happen.</p>
+            <p>At CyberStay, we're committed to making your hotel booking experience as smooth and enjoyable as possible. Our platform is designed with you in mind, and we're constantly working to improve it based on your feedback.</p>
+            <img src="https://images.unsplash.com/photo-1517840901100-8179e982acb7?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80" alt="CyberStay Team" class="img-fluid my-5">
+            <p>Thank you for choosing CyberStay. We're excited to help you find your perfect hotel.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+{% endblock main %}
