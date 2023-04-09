@@ -224,6 +224,8 @@ const getTotalCapacityPerHotel = async (hotelId) => {
 
 //#############################################################################///
 /////////////////////* user / login / signup queries*/////////////////////////////
+
+//table Users,  that has columns userID, first name, last name, username, email, phone number, password
 // Endpoint for inserting user data
 app.post('/signup', (req, res) => {
     // Extracting user data from request body
