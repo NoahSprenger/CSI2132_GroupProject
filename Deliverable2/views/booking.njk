@@ -10,7 +10,7 @@
     <h1 class="text-center mb-4">Choose and Book a Room</h1>
 
     <!-- Filter Form -->
-    <form action="#" method="get">
+    <form id="room-search-form" action="/getBookings" method="get">
       <div class="row mb-3">
         <div class="col-md-4">
           <label for="start-date" class="form-label">Start Date:</label>
@@ -70,9 +70,9 @@
         </div>
       </div>
 
-        <div class="text-center">
+        {# <div class="text-center">
         <button type="submit" class="btn btn-primary">Search</button>
-        </div>
+        </div> #}
     </form>
 
     <!-- Available Rooms Table -->
@@ -82,29 +82,47 @@
           <tr>
             <th>Room Number</th>
             <th>Hotel</th>
-            <th>Category</th>
+            <th>Amenities</th>
             <th>Capacity</th>
             <th>Price per Night</th>
             <th>Book or Rent</th>
           </tr>
         </thead>
-        <tbody>
-          {% for room in rooms %}
-          <tr>
-            <td>{{ room.room_number }}</td>
-            <td>{{ room.hotel }}</td>
-            <td>{{ room.category }}</td>
-            <td>{{ room.capacity }}</td>
-            <td>${{ room.price_per_night }}</td>
-            <td>
-              <a href="#" class="btn btn-primary">Book</a>
-              <a href="#" class="btn btn-success">Rent</a>
-            </td>
-          </tr>
-          {% endfor %}
+        <tbody id="room-table-body">
+
         </tbody>
       </table>
     </div>
 
   </div>
+  <script>
+  $(function() {
+    // Listen for changes on the form inputs
+    $('#room-search-form :input').change(function() {
+      // Get the form data
+      var formData = $('#room-search-form').serialize();
+      // Send an AJAX request to get updated data
+      $.ajax({
+        url: '/getBookings',
+        method: 'GET',
+        data: formData,
+        success: function(data) {
+          var html = '';
+          for (let i = 0; i < data.length; i++) {
+            html += '<tr>';
+            html += '<td>' + data[i].room_ID + '</td>';
+            html += '<td>' + data[i].hotel_ID + '</td>';
+            html += '<td>' + data[i].amenities + '</td>';
+            html += '<td>' + data[i].capacity + '</td>';
+            html += '<td>$' + data[i].price + '</td>';
+            html += '<td><a href="/Book/' + data[i].room_ID + '" class="btn btn-primary">Book</a> <a href="#" class="btn btn-success">Rent</a></td>';
+            html += '</tr>';
+          }
+          {# console.log(html); #}
+          $('#room-table-body').html(html);
+        }
+      });
+    });
+  });
+  </script>
 {% endblock main %}
