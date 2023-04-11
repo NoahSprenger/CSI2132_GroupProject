@@ -1,6 +1,7 @@
 var nunjucks = require("nunjucks");
 var path = require('path');
 var express = require('express');
+var bodyParser = require('body-parser')
 var useragent = require('express-useragent');
 const db = require('./db');
 
@@ -13,6 +14,8 @@ nunjucks.configure(path.join(__dirname, 'views'), {
 
 app.use(express.static(path.join(__dirname, 'public')));
 // render the templates
+app.use(bodyParser.json());
+
 app.use(useragent.express())
 
 app.get('/', (req, res) => {
@@ -31,10 +34,6 @@ app.get('/Contact', (req, res) => {
     res.render('contact.njk', {title: 'Contact'});
 });
 
-app.get('/Services', (req, res) => {
-    res.render('services.njk', {title: 'Services'});
-});
-
 app.get('/Login', (req, res) => {
     res.render('login.njk', {title: 'Login'});
 });
@@ -47,10 +46,6 @@ app.get('/ResetPassword', (req, res) => {
     res.render('resetpassword.njk', {title: 'Reset Password'});
 });
 
-// Local Testing
-app.listen(3000, function(){
-    console.log("Node application started localhost:3000");
-});
 
 
 //#############################################################################///
@@ -206,7 +201,7 @@ FROM hotel_room
 GROUP BY hotel_id;
     */
 
-  const db = require('./db'); // assuming you have a db module for database connection
+  // const db = require('./db'); // assuming you have a db module for database connection
 
 // Get total capacity of all rooms of a specific hotel
 const getTotalCapacityPerHotel = async (hotelId) => {
@@ -227,64 +222,72 @@ const getTotalCapacityPerHotel = async (hotelId) => {
 
 //table Users,  that has columns userID, first name, last name, username, email, phone number, password
 // Endpoint for inserting user data
-app.post('/signup', (req, res) => {
-    // Extracting user data from request body
-    const { userID, first_name, last_name, username, email, phone_number, password } = req.body;
-  
-    // Inserting user data into the Users table
-    const query = `INSERT INTO Users (userID, first_name, last_name, username, email, phone_number, password) 
-                   VALUES ($1, $2, $3, $4, $5, $6, $7)`;
-    const values = [userID, first_name, last_name, username, email, phone_number, password];
-  
-    db.query(query, values, (err, result) => {
-      if (err) {
-        console.error('Error inserting user data:', err);
-        res.status(500).send('Error inserting user data');
-      } else {
-        console.log('User data inserted successfully');
-        res.status(201).send('User data inserted successfully');
-      }
-    });
+app.post('/addUser', (req, res) => {
+  // Extracting user data from request body
+  // const { userID, first_name, last_name, username, email, phone_number, password } = req.body;
+
+  // Inserting user data into the Users table
+  const query = `INSERT INTO "Customer" (full_name, address, SIN, password, email) 
+                  VALUES ($1, $2, $3, $4, $5)`;
+  const values = [req.body.full_name, req.body.address, req.body.sin, req.body.password, req.body.email];
+
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error('Error inserting user data:', err);
+      res.status(500).send('Error inserting user data');
+    } else {
+      console.log('User data inserted successfully');
+      res.status(201).send('User data inserted successfully');
+      return res.redirect("/"); //redirect to home page
+    }
   });
+  res.redirect("/SignUp"); //redirect to signup page
+});
 
 // Endpoint for user login
-app.post('/login', (req, res) => {
-    // Extracting username and password from request body
-    const { username, password } = req.body;
-  
-    // Fetching user data from the Users table based on the provided username
-    const query = `SELECT * FROM Users WHERE username = $1`;
-    const values = [username];
-  
-    db.query(query, values, (err, result) => {
-      if (err) {
-        console.error('Error fetching user data:', err);
-        res.status(500).send('Error fetching user data');
-      } else {
-        // If user data is found
-        if (result.rows.length > 0) {
-          const user = result.rows[0];
-  
-          // Comparing provided password with the hashed password in the database
-          bcrypt.compare(password, user.password, (bcryptErr, bcryptResult) => {
-            if (bcryptErr) {
-              console.error('Error comparing passwords:', bcryptErr);
-              res.status(500).send('Error comparing passwords');
+app.post('/Login', (req, res) => {
+  // Extracting username and password from request body
+  const { username, password } = req.body;
+
+  // Fetching user data from the Users table based on the provided username
+  const query = `SELECT * FROM Users WHERE username = $1`;
+  const values = [username];
+
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.error('Error fetching user data:', err);
+      res.status(500).send('Error fetching user data');
+    } else {
+      // If user data is found
+      if (result.rows.length > 0) {
+        const user = result.rows[0];
+
+        // Comparing provided password with the hashed password in the database
+        bcrypt.compare(password, user.password, (bcryptErr, bcryptResult) => {
+          if (bcryptErr) {
+            console.error('Error comparing passwords:', bcryptErr);
+            res.status(500).send('Error comparing passwords');
+          } else {
+            // If password matches
+            if (bcryptResult) {
+              console.log('User logged in successfully:', user.username);
+              res.status(200).send('User logged in successfully');
             } else {
-              // If password matches
-              if (bcryptResult) {
-                console.log('User logged in successfully:', user.username);
-                res.status(200).send('User logged in successfully');
-              } else {
-                console.log('Incorrect password for user:', user.username);
-                res.status(401).send('Incorrect password');
-              }
+              console.log('Incorrect password for user:', user.username);
+              res.status(401).send('Incorrect password');
             }
-          });
-        } else {
-          console.log('User not found:', username);
-          res.status(404).send('User not found');
-        }
+          }
+        });
+      } else {
+        console.log('User not found:', username);
+        res.status(404).send('User not found');
       }
-    });
+    }
   });
+});
+
+
+  // Local Testing
+app.listen(3000, function(){
+  console.log("Node application started localhost:3000");
+});
