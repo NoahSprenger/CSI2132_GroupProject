@@ -158,6 +158,13 @@ const getHotelRoomsByCapacity = async (capacity) => {
     }
   };
 
+
+//Function to fetch all available hotel rooms with a specific capacityget hotel room by categories(ratings) stars
+
+//Function to fetch all avaible rooms by date
+
+
+
 //#############################################################################///
 /////////////////////* Getting the 2 different views*/////////////////////////////
 
