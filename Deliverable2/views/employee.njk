@@ -11,7 +11,7 @@
 
     <div class="row justify-content-center">
       <div class="col-lg-6 col-md-8">
-        <form id="booking-form">
+        <form id="booking-form" action="/bookingRenting" method="POST" enctype="application/x-www-form-urlencoded">
           <div class="mb-3">
             <label for="booking-id" class="form-label">Booking ID</label>
             <input type="text" class="form-control" id="booking-id" name="bookingId" required>
@@ -46,23 +46,4 @@
       </div>
     </div>
   </div>
-  <script>
-    $(function() {
-      $('#booking-form').submit(function(event) {
-        event.preventDefault();
-        var formData = $(this).serialize();
-        $.ajax({
-          url: '/bookingRenting',
-          method: 'POST',
-          data: formData,
-          success: function(data) {
-            alert('Payment successful!');
-          },
-          error: function(jqXHR, textStatus, errorThrown) {
-            alert('Error: ' + jqXHR.responseText);
-          }
-        });
-      });
-    });
-  </script>
 {% endblock main %}
