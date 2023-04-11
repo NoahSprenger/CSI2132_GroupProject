@@ -38,6 +38,11 @@ app.get('/Login', (req, res) => {
     res.render('login.njk', {title: 'Login'});
 });
 
+app.get('/EmployeeLogin', (req, res) => {
+  res.render('employeelogin.njk', {title: 'Employee Login'});
+});
+
+
 app.get('/SignUp', (req, res) => {
     res.render('signup.njk', {title: 'Sign Up'});
 });
