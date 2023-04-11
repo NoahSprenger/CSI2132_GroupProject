@@ -196,6 +196,10 @@ const getAvailableRooms = async (startDate, endDate, roomCapacity, area, hotelCh
   return availableRooms
 }
 
+app.post('/bookingRenting', requireEmployee, urlencodedParser, (req, res) => {
+  
+});
+
 app.post('/bookRoom', requireLogin, urlencodedParser, (req, res) => {
   const query = `UPDATE hotel_room SET status = false WHERE "room_ID" = $1`;
   const values = [req.body.roomID];
