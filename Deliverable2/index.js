@@ -173,8 +173,7 @@ const getRoomsByHotelRating = async (rating) => {
     throw err;
   }
 };
-//Function to fetch all avaible rooms by date
-// Get available rooms by date range
+//Function to fetch all avaible rooms by date range
 const getAvailableRoomsByDateRange = async (startDate, endDate) => {
   try {
     const query = `SELECT hr.*
