@@ -65,6 +65,18 @@ function requireLogin(req, res, next) {
   }
 }
 
+function requireEmployee(req,res,next) {
+  if (req.session && req.session.employeeLoggedIn) {
+    return next();
+  } else {
+    res.redirect('/EmployeeLogin');
+  }
+}
+
+app.get('/EmployeeInterface', requireEmployee, (req, res) => {
+  res.render('employeeinterface.njk', {title: 'Employee Interface'});
+});
+
 app.get('/Book/:roomId', requireLogin, (req, res) => {
   const roomId = req.params.roomId;
   db.query(`SELECT * FROM hotel_room WHERE "room_ID" = ${roomId}`, (err, result) => {
@@ -206,7 +218,31 @@ app.post('/bookRoom', requireLogin, urlencodedParser, (req, res) => {
   return res.render("thankyou.njk", {title: 'Thank You'});
 });
 
-// User Login
+
+app.get('/SignUpEmployee', (req, res) => {
+    res.render('signupemployee.njk', {title: 'Sign Up Employee'});
+});
+
+// Employee signup
+app.post('/addEmployee', urlencodedParser, (req, res) => {
+  const query = `INSERT INTO employees ("SIN", role, full_name, address, email, password) 
+                  VALUES ($1, $2, $3, $4, $5, $6)`;
+  (async () => {
+      const hash2 = await bcrypt.hash(req.body.password, saltRounds);
+      // Store hash in your password DB.
+      const values = [req.body.sin, req.body.role, req.body.full_name, req.body.address, req.body.email, hash2 ];
+
+      db.query(query, values, (err, result) => {
+        if (err) {
+          console.log('Error inserting employee data:', err);
+          return res.redirect("/SignUpEmployee");
+        }
+      })
+  })();
+  return res.redirect("/"); //redirect to home page
+});
+
+// User signup
 app.post('/addUser', urlencodedParser, (req, res) => {
   const query = `INSERT INTO customers (full_name, address, "SIN", password, email) 
                   VALUES ($1, $2, $3, $4, $5)`;
@@ -250,6 +286,8 @@ app.post('/loginEmployee', urlencodedParser, (req, res) => {
           } else {
             // If password matches
             if (bcryptResult) {
+              req.session.sin = user.SIN;
+              req.session.employeeLoggedIn = true;
               req.session.loggedIn = true;
               req.session.save((err) => {
                 if (err) {

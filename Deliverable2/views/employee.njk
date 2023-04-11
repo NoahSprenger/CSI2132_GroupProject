@@ -1,0 +1,68 @@
+{% extends "base.njk" %}
+{% block css %}
+<link rel="stylesheet" href="css/index.css">
+{% endblock css %}
+{% block styling %}
+
+{% endblock styling %}
+{% block main %}
+    <div class="container my-5">
+    <h1 class="text-center mb-5">CyberStay Booking and Renting Interface</h1>
+
+    <div class="row justify-content-center">
+      <div class="col-lg-6 col-md-8">
+        <form id="booking-form">
+          <div class="mb-3">
+            <label for="booking-id" class="form-label">Booking ID</label>
+            <input type="text" class="form-control" id="booking-id" name="bookingId" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="booking-type" class="form-label">Booking Type</label>
+            <select class="form-select" id="booking-type" name="bookingType" required>
+              <option value="">Choose...</option>
+              <option value="booking">Booking</option>
+              <option value="renting">Renting</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="customer-id" class="form-label">Customer ID</label>
+            <input type="text" class="form-control" id="customer-id" name="customerId" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="payment-amount" class="form-label">Payment Amount</label>
+            <div class="input-group">
+              <span class="input-group-text">$</span>
+              <input type="number" class="form-control" id="payment-amount" name="paymentAmount" required>
+            </div>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button class="btn btn-primary" type="submit">Submit</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <script>
+    $(function() {
+      $('#booking-form').submit(function(event) {
+        event.preventDefault();
+        var formData = $(this).serialize();
+        $.ajax({
+          url: '/bookingRenting',
+          method: 'POST',
+          data: formData,
+          success: function(data) {
+            alert('Payment successful!');
+          },
+          error: function(jqXHR, textStatus, errorThrown) {
+            alert('Error: ' + jqXHR.responseText);
+          }
+        });
+      });
+    });
+  </script>
+{% endblock main %}
