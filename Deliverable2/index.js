@@ -20,6 +20,7 @@ app.use(session({
   secret: 'mySecretKey',
   resave: false,
   saveUninitialized: true,
+  cookie: { secure: false }
 }));
 app.use(express.static(path.join(__dirname, 'public')));
 // render the templates
@@ -47,8 +48,32 @@ app.get('/Login', (req, res) => {
     res.render('login.njk', {title: 'Login'});
 });
 
+app.get('/Logout', requireLogin, (req, res) => {
+  req.session.destroy();
+  res.redirect('/');
+});
+
 app.get('/EmployeeLogin', (req, res) => {
   res.render('employeelogin.njk', {title: 'Employee Login'});
+});
+
+function requireLogin(req, res, next) {
+  if (req.session && req.session.loggedIn) {
+    return next();
+  } else {
+    res.redirect('/Login');
+  }
+}
+
+app.get('/Book/:roomId', requireLogin, (req, res) => {
+  const roomId = req.params.roomId;
+  db.query(`SELECT * FROM hotel_room WHERE "room_ID" = ${roomId}`, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render('book.njk', {title: 'Book', room: result.rows});
+    }
+  });
 });
 
 
@@ -203,8 +228,14 @@ app.post('/loginEmployee', urlencodedParser, (req, res) => {
           } else {
             // If password matches
             if (bcryptResult) {
-              console.log('User logged in successfully:', user.username);
-              req.session.isLoggedIn = true;
+              req.session.loggedIn = true;
+              req.session.save((err) => {
+                if (err) {
+                  console.error('Error saving session:', err);
+                } else {
+                  console.log('Session saved successfully');
+                }
+              });
             } else {
               console.log('Incorrect password for user:', user.username);
               // res.status(401).send('Incorrect password');
@@ -246,10 +277,16 @@ app.post('/loginCustomer', urlencodedParser, (req, res) => {
           } else {
             // If password matches
             if (bcryptResult) {
-              console.log('User logged in successfully:', user.username);
-              req.session.isLoggedIn = true;
+              req.session.loggedIn = true;
+              req.session.save((err) => {
+                if (err) {
+                  console.error('Error saving session:', err);
+                } else {
+                  console.log('Session saved successfully');
+                }
+              });
             } else {
-              console.log('Incorrect password for user:', user.username);
+              console.log('Incorrect password for user:', user.email);
               // res.status(401).send('Incorrect password');
               return res.redirect("/Login");
             }
