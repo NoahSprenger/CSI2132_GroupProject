@@ -71,7 +71,7 @@ app.get('/Book/:roomId', requireLogin, (req, res) => {
     if (err) {
       console.log(err);
     } else {
-      res.render('book.njk', {title: 'Book', room: result.rows});
+      res.render('book.njk', {title: 'Book', room: result.rows[0], email: req.session.email, name: req.session.name});
     }
   });
 });
@@ -89,13 +89,13 @@ app.get('/ResetPassword', (req, res) => {
 app.get('/getBookings', async (req, res) => {
   let conditions = 0;
   const startDate = req.query.start_date;
-  if (startDate != '') {
-    conditions++;
-  }
+  // if (startDate != '') {
+  //   conditions++;
+  // }
   const endDate = req.query.end_date;
-  if (endDate != '') {
-    conditions++;
-  }
+  // if (endDate != '') {
+  //   conditions++;
+  // }
   const roomCapacity = req.query.room_capacity;
   if (roomCapacity != '') {
     conditions++;
@@ -183,6 +183,28 @@ const getAvailableRooms = async (startDate, endDate, roomCapacity, area, hotelCh
   availableRooms = fourOccurrences;
   return availableRooms
 }
+
+app.post('/bookRoom', requireLogin, urlencodedParser, (req, res) => {
+  const query = `UPDATE hotel_room SET status = false WHERE "room_ID" = $1`;
+  const values = [req.body.roomID];
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.redirect("/Book/" + req.body.roomId);
+    }
+  });
+  // create the booking
+  const query2 = `INSERT INTO booking (room_id, hotel_id, check_in, check_out, "c_SIN")
+  VALUES ($1, $2, $3, $4, $5)`;
+  const values2 = [req.body.roomID, req.body.hotelID, req.body.checkInDate, req.body.checkOutDate, req.session.sin];
+  db.query(query2, values2, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.redirect("/Book/" + req.body.roomId);
+    }
+  });
+  return res.render("thankyou.njk", {title: 'Thank You'});
+});
 
 // User Login
 app.post('/addUser', urlencodedParser, (req, res) => {
@@ -277,6 +299,9 @@ app.post('/loginCustomer', urlencodedParser, (req, res) => {
           } else {
             // If password matches
             if (bcryptResult) {
+              req.session.email = req.body.email;
+              req.session.sin = user.SIN;
+              req.session.name = user.full_name;
               req.session.loggedIn = true;
               req.session.save((err) => {
                 if (err) {

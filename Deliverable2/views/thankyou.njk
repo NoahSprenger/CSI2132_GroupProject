@@ -1,0 +1,22 @@
+{% extends "base.njk" %}
+{% block css %}
+<link rel="stylesheet" href="css/index.css">
+{% endblock css %}
+{% block styling %}
+
+{% endblock styling %}
+{% block main %}
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-sm">
+          <div class="card-body text-center">
+            <h1 class="display-4 mb-3">Thank You for Booking with CyberStay</h1>
+            <p class="lead">Your booking is confirmed and we look forward to hosting you. We have sent a confirmation email to {{ booking.contactEmail }} with your booking details.</p>
+            <a href="/" class="btn btn-primary mt-3">Return to Homepage</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock main %}

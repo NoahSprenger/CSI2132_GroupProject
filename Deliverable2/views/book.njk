@@ -6,54 +6,47 @@
 
 {% endblock styling %}
 {% block main %}
-      <div class="container my-5">
-    <h1>Book a Room</h1>
-    <div class="row mt-5">
-      <div class="col-md-6">
-        <form>
-          <div class="mb-3">
-            <label for="roomType" class="form-label">Room Type</label>
-            <select class="form-select" id="roomType">
-              <option selected disabled>Select a room type</option>
-              <option value="single">Single</option>
-              <option value="double">Double</option>
-              <option value="suite">Suite</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label for="checkIn" class="form-label">Check-in Date</label>
-            <input type="date" class="form-control" id="checkIn">
-          </div>
-          <div class="mb-3">
-            <label for="checkOut" class="form-label">Check-out Date</label>
-            <input type="date" class="form-control" id="checkOut">
-          </div>
-          <button type="submit" class="btn btn-primary">Check Availability</button>
-        </form>
-      </div>
-      <div class="col-md-6">
-        <div class="card">
-          <div class="card-header">
-            Room Details
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">Room Type: <span id="roomTypeLabel"></span></h5>
-            <p class="card-text">Hotel Name: <span id="hotelNameLabel"></span></p>
-            <p class="card-text">Price per Night: <span id="priceLabel"></span></p>
-            <form>
-              <div class="mb-3">
-                <label for="guests" class="form-label">Number of Guests</label>
-                <input type="number" class="form-control" id="guests" min="1">
-              </div>
-              <div class="mb-3">
-                <label for="totalPrice" class="form-label">Total Price</label>
-                <input type="text" class="form-control" id="totalPrice" readonly>
-              </div>
-              <button type="submit" class="btn btn-primary">Book Now</button>
-            </form>
-          </div>
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <h2 class="text-center mb-5">Book Room {{ room.room_ID }} with CyberStay</h2>
+
+      <form action="/bookRoom" method="POST" enctype="application/x-www-form-urlencoded">
+        <div class="mb-3">
+          <label for="check-in-date" class="form-label">Check-in Date</label>
+          <input type="date" class="form-control" id="check-in-date" name="checkInDate" required>
         </div>
-      </div>
+        <div class="mb-3">
+          <label for="check-out-date" class="form-label">Check-out Date</label>
+          <input type="date" class="form-control" id="check-out-date" name="checkOutDate" required>
+        </div>
+        <div class="mb-3">
+          <label for="guests" class="form-label">Number of Guests</label>
+          <input type="number" class="form-control" id="guests" name="guests" required>
+        </div>
+        <div class="mb-3">
+          <label for="contact-name" class="form-label">Contact Name</label>
+          <input type="text" class="form-control" id="contact-name" name="contactName" value="{{ name }}" required>
+        </div>
+        <div class="mb-3">
+          <label for="contact-email" class="form-label">Contact Email</label>
+          <input type="email" class="form-control" id="contact-email" name="contactEmail" value="{{ email }}" required>
+        </div>
+        <div class="mb-3">
+          <label for="contact-phone" class="form-label">Contact Phone</label>
+          <input type="tel" class="form-control" id="contact-phone" name="contactPhone" required>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary">Book Room</button>
+        </div>
+
+        <input type="hidden" name="roomID" value="{{ room.room_ID }}">
+        <input type="hidden" name="hotelID" value="{{ room.hotel_ID }}">
+        <input type="hidden" name="price" value="{{ room.price }}">
+      </form>
+
     </div>
   </div>
+</div>
 {% endblock main %}
