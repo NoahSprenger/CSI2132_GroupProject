@@ -4,7 +4,6 @@
 
 CREATE TABLE IF NOT EXISTS public.booking
 (
-    conf_num integer NOT NULL,
     room_id integer NOT NULL,
     hotel_id integer NOT NULL,
     check_in date NOT NULL,

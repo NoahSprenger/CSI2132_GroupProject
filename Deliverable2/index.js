@@ -12,8 +12,8 @@ const saltRounds = 10;
 var app = express();
 
 nunjucks.configure(path.join(__dirname, 'views'), {
-    autoescape: true,
-    express: app
+  autoescape: true,
+  express: app
 });
 
 app.use(session({
@@ -29,23 +29,23 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 app.use(useragent.express())
 
 app.get('/', (req, res) => {
-    res.render('index.njk', {title: 'Home'});
+  res.render('index.njk', { title: 'Home' });
 });
 
 app.get('/Booking', (req, res) => {
-    res.render('booking.njk', {title: 'Booking'});
+  res.render('booking.njk', { title: 'Booking' });
 });
 
 app.get('/About', (req, res) => {
-    res.render('about.njk', {title: 'About'});
+  res.render('about.njk', { title: 'About' });
 });
 
 app.get('/Contact', (req, res) => {
-    res.render('contact.njk', {title: 'Contact'});
+  res.render('contact.njk', { title: 'Contact' });
 });
 
 app.get('/Login', (req, res) => {
-    res.render('login.njk', {title: 'Login'});
+  res.render('login.njk', { title: 'Login' });
 });
 
 app.get('/Logout', requireLogin, (req, res) => {
@@ -54,7 +54,7 @@ app.get('/Logout', requireLogin, (req, res) => {
 });
 
 app.get('/EmployeeLogin', (req, res) => {
-  res.render('employeelogin.njk', {title: 'Employee Login'});
+  res.render('employeelogin.njk', { title: 'Employee Login' });
 });
 
 function requireLogin(req, res, next) {
@@ -65,7 +65,7 @@ function requireLogin(req, res, next) {
   }
 }
 
-function requireEmployee(req,res,next) {
+function requireEmployee(req, res, next) {
   if (req.session && req.session.employeeLoggedIn) {
     return next();
   } else {
@@ -74,7 +74,7 @@ function requireEmployee(req,res,next) {
 }
 
 app.get('/EmployeeInterface', requireEmployee, (req, res) => {
-  res.render('employee.njk', {title: 'Employee Interface'});
+  res.render('employee.njk', { title: 'Employee Interface' });
 });
 
 app.get('/Book/:roomId', requireLogin, (req, res) => {
@@ -83,18 +83,29 @@ app.get('/Book/:roomId', requireLogin, (req, res) => {
     if (err) {
       console.log(err);
     } else {
-      res.render('book.njk', {title: 'Book', room: result.rows[0], email: req.session.email, name: req.session.name});
+      res.render('book.njk', { title: 'Book', room: result.rows[0], email: req.session.email, name: req.session.name });
+    }
+  });
+});
+
+app.get('/Rent/:roomId', requireEmployee, (req, res) => {
+  const roomId = req.params.roomId;
+  db.query(`SELECT * FROM hotel_room WHERE "room_ID" = ${roomId}`, (err, result) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.render('rent.njk', { title: 'Rent', room: result.rows[0], eSIN: req.session.sin });
     }
   });
 });
 
 
 app.get('/SignUp', (req, res) => {
-    res.render('signup.njk', {title: 'Sign Up'});
+  res.render('signup.njk', { title: 'Sign Up' });
 });
 
 app.get('/ResetPassword', (req, res) => {
-    res.render('resetpassword.njk', {title: 'Reset Password'});
+  res.render('resetpassword.njk', { title: 'Reset Password' });
 });
 
 // Handle the form submission and render the available rooms table
@@ -121,13 +132,13 @@ app.get('/getBookings', async (req, res) => {
     conditions++;
   }
   const hotelCategory = req.query.hotel_category;
-  if (hotelCategory != '') {
-    conditions++;
-  }
+  // if (hotelCategory != '') {
+  //   conditions++;
+  // }
   const totalRooms = req.query.total_rooms;
-  if (totalRooms != '') {
-    conditions++;
-  }
+  // if (totalRooms != '') {
+  //   conditions++;
+  // }
   const priceMin = req.query.price_min;
   const priceMax = req.query.price_max;
   if (priceMin != '' && priceMax != '') {
@@ -196,21 +207,25 @@ const getAvailableRooms = async (startDate, endDate, roomCapacity, area, hotelCh
   return availableRooms
 }
 
-app.post('/bookingRenting', requireEmployee, urlencodedParser, (req, res) => {
+app.post('/bookingRenting', requireEmployee, urlencodedParser, async (req, res) => {
 
   const query = `SELECT * FROM booking WHERE "c_SIN" = $1`;
 
   const values = [req.body.customerSIN];
-  db.query(query, values, (err, result) => {
+  await db.query(query, values, (err, result) => {
     if (err) {
       console.log(err);
       return res.redirect("/EmployeeInterface");
-    } 
+    }
     if (result.rows.length > 0) {
       const query2 = `INSERT INTO renting (room_id, hotel_id, "c_SIN", "e_SIN")
       VALUES ($1, $2, $3, $4)`;
-      const values2 = [result.rows[0].room_id, result.rows[0].hotel_id, req.body.customerSIN, req.session.sin];
-      
+      const room_id = result.rows[0].room_id;
+      const hotel_id = result.rows[0].hotel_id;
+      const checkInDate = result.rows[0].check_in;
+      const checkOutDate = result.rows[0].check_out;
+      const values2 = [room_id, hotel_id, req.body.customerSIN, req.session.sin];
+
       db.query(query2, values2, (err, result) => {
         if (err) {
           console.log(err);
@@ -223,17 +238,56 @@ app.post('/bookingRenting', requireEmployee, urlencodedParser, (req, res) => {
             console.log(err);
             return res.redirect("/EmployeeInterface");
           }
+            // create the archive
+          const query4 = `INSERT INTO archive ("hotel_ID", "c_SIN", "e_SIN", check_in, check_out)
+          VALUES ($1, $2, $3, $4, $5)`;
+          const values4 = [hotel_id, req.body.customerSIN, req.session.sin, checkInDate, checkOutDate];
+          db.query(query4, values4, (err, result4) => {
+            if (err) {
+              console.log(err);
+              return res.redirect("/EmployeeInterface");
+            }
+          });
         });
       });
     } else {
       return res.redirect("/EmployeeInterface");
     }
   });
+  return res.render("thankyou.njk", { title: 'Thank You' });
+});
 
-
-  
-  return res.render("thankyou.njk", {title: 'Thank You'});
-});        
+app.post('/rentRoom', requireLogin, urlencodedParser, (req, res) => {
+  const query = `UPDATE hotel_room SET status = false WHERE "room_ID" = $1`;
+  const values = [req.body.roomID];
+  db.query(query, values, (err, result) => {
+    if (err) {values4
+      console.log(err);
+      return res.redirect("/Rent/" + req.body.roomId);
+    }
+  });
+  // create the booking
+  const query2 = `INSERT INTO renting (room_id, hotel_id, "c_SIN", "e_SIN")
+  VALUES ($1, $2, $3, $4)`;
+  const values2 = [req.body.roomID, req.body.hotelID, req.body.cSIN, req.session.sin];
+  db.query(query2, values2, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.redirect("/Rent/" + req.body.roomId);
+    }
+  });
+  // create the archive
+  const query3 = `INSERT INTO archive ("hotel_ID", "c_SIN", "e_SIN", check_in, check_out)
+  VALUES ($1, $2, $3, $4, $5)`;
+  const values3 = [req.body.hotelID, req.body.cSIN, req.session.sin, req.body.checkInDate, req.body.checkOutDate];
+  db.query(query3, values3, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.redirect("/Rent/" + req.body.roomId);
+    }
+  });
+  return res.render("thankyou.njk", { title: 'Thank You' });
+});
 
 app.post('/bookRoom', requireLogin, urlencodedParser, (req, res) => {
   const query = `UPDATE hotel_room SET status = false WHERE "room_ID" = $1`;
@@ -254,12 +308,12 @@ app.post('/bookRoom', requireLogin, urlencodedParser, (req, res) => {
       return res.redirect("/Book/" + req.body.roomId);
     }
   });
-  return res.render("thankyou.njk", {title: 'Thank You'});
+  return res.render("thankyou.njk", { title: 'Thank You' });
 });
 
 
 app.get('/SignUpEmployee', (req, res) => {
-    res.render('signupemployee.njk', {title: 'Sign Up Employee'});
+  res.render('signupemployee.njk', { title: 'Sign Up Employee' });
 });
 
 // Employee signup
@@ -267,16 +321,16 @@ app.post('/addEmployee', urlencodedParser, (req, res) => {
   const query = `INSERT INTO employees ("SIN", role, full_name, address, email, password) 
                   VALUES ($1, $2, $3, $4, $5, $6)`;
   (async () => {
-      const hash2 = await bcrypt.hash(req.body.password, saltRounds);
-      // Store hash in your password DB.
-      const values = [req.body.sin, req.body.role, req.body.full_name, req.body.address, req.body.email, hash2 ];
+    const hash2 = await bcrypt.hash(req.body.password, saltRounds);
+    // Store hash in your password DB.
+    const values = [req.body.sin, req.body.role, req.body.full_name, req.body.address, req.body.email, hash2];
 
-      db.query(query, values, (err, result) => {
-        if (err) {
-          console.log('Error inserting employee data:', err);
-          return res.redirect("/SignUpEmployee");
-        }
-      })
+    db.query(query, values, (err, result) => {
+      if (err) {
+        console.log('Error inserting employee data:', err);
+        return res.redirect("/SignUpEmployee");
+      }
+    })
   })();
   return res.redirect("/"); //redirect to home page
 });
@@ -286,16 +340,16 @@ app.post('/addUser', urlencodedParser, (req, res) => {
   const query = `INSERT INTO customers (full_name, address, "SIN", password, email) 
                   VALUES ($1, $2, $3, $4, $5)`;
   (async () => {
-      const hash2 = await bcrypt.hash(req.body.password, saltRounds);
-      // Store hash in your password DB.
-      const values = [req.body.full_name, req.body.address, req.body.sin, hash2, req.body.email];
+    const hash2 = await bcrypt.hash(req.body.password, saltRounds);
+    // Store hash in your password DB.
+    const values = [req.body.full_name, req.body.address, req.body.sin, hash2, req.body.email];
 
-      db.query(query, values, (err, result) => {
-        if (err) {
-          console.log('Error inserting user data:', err);
-          return res.redirect("/SignUp");
-        }
-      })
+    db.query(query, values, (err, result) => {
+      if (err) {
+        console.log('Error inserting user data:', err);
+        return res.redirect("/SignUp");
+      }
+    })
   })();
   return res.redirect("/"); //redirect to home page
 });
@@ -408,29 +462,29 @@ app.post('/loginCustomer', urlencodedParser, (req, res) => {
 
 // Function to fetch hotel rooms with price within a specified range
 const getHotelRoomsByPriceRange = async (minPrice, maxPrice) => {
-    try {
-      // Query to fetch hotel rooms with price within the specified range
-      const query = `
+  try {
+    // Query to fetch hotel rooms with price within the specified range
+    const query = `
         SELECT * FROM hotel_room
         WHERE price BETWEEN $1 AND $2;
       `;
-      const values = [minPrice, maxPrice];
-  
-      // Execute the query using the db.query() method from the db module
-      const result = await db.query(query, values);
-      // Return the fetched hotel rooms
-      return result.rows;
-    } catch (error) {
-      console.error('Error fetching hotel rooms:', error);
-      throw error;
-    }
-  };
+    const values = [minPrice, maxPrice];
 
-  // Function to fetch all hotel rooms located in a specific city
+    // Execute the query using the db.query() method from the db module
+    const result = await db.query(query, values);
+    // Return the fetched hotel rooms
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching hotel rooms:', error);
+    throw error;
+  }
+};
+
+// Function to fetch all hotel rooms located in a specific city
 const getHotelRoomsByCity = async (city) => {
-    try {
-      // Query to fetch hotel rooms by city
-      const query = `
+  try {
+    // Query to fetch hotel rooms by city
+    const query = `
       SELECT *
       FROM hotel_room
       WHERE "hotel_ID" IN (
@@ -438,82 +492,82 @@ const getHotelRoomsByCity = async (city) => {
           FROM hotel
           WHERE address LIKE $1
       );
-      `;  
+      `;
 
-      const values = [`%${city}%`];
-      const result = await db.query(query, values);
-  
-      return result.rows;
-    } catch (error) {
-      console.error('Error fetching hotel rooms by city:', error);
-      throw error;
-    }
-  };
+    const values = [`%${city}%`];
+    const result = await db.query(query, values);
 
-  // Function to fetch all hotel rooms offered by a specific hotel chain
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching hotel rooms by city:', error);
+    throw error;
+  }
+};
+
+// Function to fetch all hotel rooms offered by a specific hotel chain
 const getHotelRoomsByHotelChain = async (hotelChainName) => {
-    try {
-      // Query to fetch hotel rooms by hotel chain name       ///NEED TO CHANGE COLUMNE NAMEs??
-      const query = `
+  try {
+    // Query to fetch hotel rooms by hotel chain name       ///NEED TO CHANGE COLUMNE NAMEs??
+    const query = `
       SELECT hr.*
       FROM hotel_room hr
       INNER JOIN hotel h ON h."hotelID" = hr."hotel_ID"
       INNER JOIN "hotel chain" hc ON hc."chainID" = h."chainID"
       WHERE hc.chainname = $1;
       `;
-      const values = [hotelChainName];
-  
-      const result = await db.query(query, values);
-  
-      return result.rows;
-    } catch (error) {
-      console.error('Error fetching hotel rooms by hotel chain:', error);
-      throw error;
-    }
-  };
-  
+    const values = [hotelChainName];
 
-  // Function to fetch all available hotel rooms offered by a specific hotel
+    const result = await db.query(query, values);
+
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching hotel rooms by hotel chain:', error);
+    throw error;
+  }
+};
+
+
+// Function to fetch all available hotel rooms offered by a specific hotel
 const getHotelRoomsByHotelID = async (hotelID) => {
-    try {
-      // Query to fetch available hotel rooms by hotelID    ###WE SHOULD ADD ROOM STATUS PROBABLY
-      const query = `
+  try {
+    // Query to fetch available hotel rooms by hotelID    ###WE SHOULD ADD ROOM STATUS PROBABLY
+    const query = `
         SELECT *
         FROM hotel_room
         WHERE "hotel_ID" = $1
         AND status = true;
       `;
-      const values = [hotelID];
-  
-      const result = await db.query(query, values);
-  
-      return result.rows;
-    } catch (error) {
-      console.error('Error fetching available hotel rooms by hotel ID:', error);
-      throw error;
-    }
-  };
+    const values = [hotelID];
 
-  // Function to fetch all available hotel rooms with a specific capacity
+    const result = await db.query(query, values);
+
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching available hotel rooms by hotel ID:', error);
+    throw error;
+  }
+};
+
+// Function to fetch all available hotel rooms with a specific capacity
 const getHotelRoomsByCapacity = async (capacity) => {
-    try {
-      // Query to fetch available hotel rooms by capacity
-      const query = `
+  try {
+    // Query to fetch available hotel rooms by capacity
+    const query = `
         SELECT *
         FROM hotel_room
         WHERE "capacity" = $1
         AND status = true;
       `;
-      const values = [capacity];
-  
-      const result = await db.query(query, values);
-  
-      return result.rows;
-    } catch (error) {
-      console.error('Error fetching available hotel rooms by capacity:', error);
-      throw error;
-    }
-  };
+    const values = [capacity];
+
+    const result = await db.query(query, values);
+
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching available hotel rooms by capacity:', error);
+    throw error;
+  }
+};
 
 //#############################################################################///
 /////////////////////* Getting the 2 different views*/////////////////////////////
@@ -556,7 +610,7 @@ FROM hotel_room
 GROUP BY hotel_id;
     */
 
-  // const db = require('./db'); // assuming you have a db module for database connection
+// const db = require('./db'); // assuming you have a db module for database connection
 
 // Get total capacity of all rooms of a specific hotel
 const getTotalCapacityPerHotel = async (hotelId) => {
@@ -570,6 +624,6 @@ const getTotalCapacityPerHotel = async (hotelId) => {
   }
 };
 
-app.listen(3000, function(){
+app.listen(3000, function () {
   console.log("Node application started localhost:3000");
 });
