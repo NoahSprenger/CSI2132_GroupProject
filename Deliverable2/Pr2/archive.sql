@@ -15,16 +15,6 @@ CREATE TABLE IF NOT EXISTS public.archive
         REFERENCES public.customers ("SIN") MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
-    CONSTRAINT check_in FOREIGN KEY (check_in)
-        REFERENCES public.booking (check_in) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-        NOT VALID,
-    CONSTRAINT check_out FOREIGN KEY (check_out)
-        REFERENCES public.booking (check_out) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-        NOT VALID,
     CONSTRAINT "e_SIN" FOREIGN KEY ("e_SIN")
         REFERENCES public.employees ("SIN") MATCH SIMPLE
         ON UPDATE NO ACTION

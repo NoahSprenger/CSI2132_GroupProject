@@ -1,0 +1,55 @@
+{% extends "base.njk" %}
+{% block css %}
+<link rel="stylesheet" href="css/index.css">
+{% endblock css %}
+{% block styling %}
+
+{% endblock styling %}
+{% block main %}
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <h2 class="text-center mb-5">Rent Room {{ room.room_ID }} with CyberStay</h2>
+
+      <form action="/rentRoom" method="POST" enctype="application/x-www-form-urlencoded">
+        <div class="mb-3">
+          <label for="check-in-date" class="form-label">Check-in Date</label>
+          <input type="date" class="form-control" id="check-in-date" name="checkInDate" required>
+        </div>
+        <div class="mb-3">
+          <label for="check-out-date" class="form-label">Check-out Date</label>
+          <input type="date" class="form-control" id="check-out-date" name="checkOutDate" required>
+        </div>
+        <div class="mb-3">
+          <label for="guests" class="form-label">Number of Guests</label>
+          <input type="number" class="form-control" id="guests" name="guests" required>
+        </div>
+        <div class="mb-3">
+          <label for="contact-name" class="form-label">Customer SIN</label>
+          <input type="text" class="form-control" id="contact-sin" name="cSIN" required>
+        </div>
+        <div class="mb-3">
+          <label for="contact-name" class="form-label">Contact Name</label>
+          <input type="text" class="form-control" id="contact-name" name="contactName" value="{{ name }}" required>
+        </div>
+        <div class="mb-3">
+          <label for="contact-email" class="form-label">Contact Email</label>
+          <input type="email" class="form-control" id="contact-email" name="contactEmail" value="{{ email }}" required>
+        </div>
+        <div class="mb-3">
+          <label for="contact-phone" class="form-label">Contact Phone</label>
+          <input type="tel" class="form-control" id="contact-phone" name="contactPhone" required>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button type="submit" class="btn btn-primary">Rent Room</button>
+        </div>
+
+        <input type="hidden" name="roomID" value="{{ room.room_ID }}">
+        <input type="hidden" name="hotelID" value="{{ room.hotel_ID }}">
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock main %}
