@@ -74,7 +74,7 @@ function requireEmployee(req,res,next) {
 }
 
 app.get('/EmployeeInterface', requireEmployee, (req, res) => {
-  res.render('employeeinterface.njk', {title: 'Employee Interface'});
+  res.render('employee.njk', {title: 'Employee Interface'});
 });
 
 app.get('/Book/:roomId', requireLogin, (req, res) => {
@@ -197,8 +197,43 @@ const getAvailableRooms = async (startDate, endDate, roomCapacity, area, hotelCh
 }
 
 app.post('/bookingRenting', requireEmployee, urlencodedParser, (req, res) => {
+
+  const query = `SELECT * FROM booking WHERE "c_SIN" = $1`;
+
+  const values = [req.body.customerSIN];
+  db.query(query, values, (err, result) => {
+    if (err) {
+      console.log(err);
+      return res.redirect("/EmployeeInterface");
+    } 
+    if (result.rows.length > 0) {
+      const query2 = `INSERT INTO renting (room_id, hotel_id, "c_SIN", "e_SIN")
+      VALUES ($1, $2, $3, $4)`;
+      const values2 = [result.rows[0].room_id, result.rows[0].hotel_id, req.body.customerSIN, req.session.sin];
+      
+      db.query(query2, values2, (err, result) => {
+        if (err) {
+          console.log(err);
+          return res.redirect("/EmployeeInterface");
+        }
+        const query3 = `DELETE FROM booking WHERE "c_SIN" = $1`;
+        const values3 = [req.body.customerSIN];
+        db.query(query3, values3, (err, result) => {
+          if (err) {
+            console.log(err);
+            return res.redirect("/EmployeeInterface");
+          }
+        });
+      });
+    } else {
+      return res.redirect("/EmployeeInterface");
+    }
+  });
+
+
   
-});
+  return res.render("thankyou.njk", {title: 'Thank You'});
+});        
 
 app.post('/bookRoom', requireLogin, urlencodedParser, (req, res) => {
   const query = `UPDATE hotel_room SET status = false WHERE "room_ID" = $1`;
@@ -308,7 +343,7 @@ app.post('/loginEmployee', urlencodedParser, (req, res) => {
           }
         })
       } else {
-        console.log('User not found:', username);
+        console.log('User not found:');
         // res.status(404).send('User not found');
       }
     }
