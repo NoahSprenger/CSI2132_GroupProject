@@ -642,8 +642,6 @@ FROM hotel_room
 GROUP BY hotel_id;
     */
 
-// const db = require('./db'); // assuming you have a db module for database connection
-
 // Get total capacity of all rooms of a specific hotel
 const getTotalCapacityPerHotel = async (hotelId) => {
   try {
