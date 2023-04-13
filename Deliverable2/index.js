@@ -112,13 +112,10 @@ app.get('/ResetPassword', (req, res) => {
 app.get('/getBookings', async (req, res) => {
   let conditions = 0;
   const startDate = req.query.start_date;
-  // if (startDate != '') {
-  //   conditions++;
-  // }
   const endDate = req.query.end_date;
-  // if (endDate != '') {
-  //   conditions++;
-  // }
+  if (startDate != '' && endDate != '') {
+    conditions++;
+  }
   const roomCapacity = req.query.room_capacity;
   if (roomCapacity != '') {
     conditions++;
@@ -132,9 +129,9 @@ app.get('/getBookings', async (req, res) => {
     conditions++;
   }
   const hotelCategory = req.query.hotel_category;
-  // if (hotelCategory != '') {
-  //   conditions++;
-  // }
+  if (hotelCategory != '') {
+    conditions++;
+  }
   const totalRooms = req.query.total_rooms;
   // if (totalRooms != '') {
   //   conditions++;
@@ -170,6 +167,14 @@ const getAvailableRooms = async (startDate, endDate, roomCapacity, area, hotelCh
     console.log(err);
   }
   try {
+    tempArray = await getRoomsByHotelRating(hotelCategory);
+    tempArray.forEach((item) => {
+      availableRooms.push(item);
+    })
+  } catch (err) {
+    console.log(err);
+  }
+  try {
     tempArray = await getHotelRoomsByCity(area);
     tempArray.forEach((item) => {
       availableRooms.push(item);
@@ -186,6 +191,16 @@ const getAvailableRooms = async (startDate, endDate, roomCapacity, area, hotelCh
   } catch (err) {
     console.log(err);
   }
+
+  try {
+    tempArray = await getAvailableRoomsByDateRange(startDate, endDate);
+    tempArray.forEach((item) => {
+      availableRooms.push(item);
+    })
+  } catch (err) {
+    console.log(err);
+  }
+
 
   const count = {};
   var fourOccurrences = [];
@@ -526,28 +541,6 @@ const getHotelRoomsByHotelChain = async (hotelChainName) => {
   }
 };
 
-
-// Function to fetch all available hotel rooms offered by a specific hotel
-const getHotelRoomsByHotelID = async (hotelID) => {
-  try {
-    // Query to fetch available hotel rooms by hotelID    ###WE SHOULD ADD ROOM STATUS PROBABLY
-    const query = `
-        SELECT *
-        FROM hotel_room
-        WHERE "hotel_ID" = $1
-        AND status = true;
-      `;
-    const values = [hotelID];
-
-    const result = await db.query(query, values);
-
-    return result.rows;
-  } catch (error) {
-    console.error('Error fetching available hotel rooms by hotel ID:', error);
-    throw error;
-  }
-};
-
 // Function to fetch all available hotel rooms with a specific capacity
 const getHotelRoomsByCapacity = async (capacity) => {
   try {
@@ -573,12 +566,13 @@ const getHotelRoomsByCapacity = async (capacity) => {
 //Function to fetch all available hotel rooms with a specific category(ratings[1,2,3,4,5])
 const getRoomsByHotelRating = async (rating) => {
   try {
-    const query = `SELECT hr.* 
-                   FROM hotel_room hr
-                   JOIN hotel h ON hr.hotel_ID = h."hotelID"
-                   WHERE h.rating = $1 AND hr.room_Status = 'AVAILABLE';`;
-    const result = await db.any(query, [rating]);
-    return result;
+    const query = `SELECT hr.*              
+    FROM hotel_room hr
+    JOIN hotel h ON hr."hotel_ID" = h."hotelID"
+    WHERE h.rating = $1 AND hr.status = true;`;
+    const values = [rating];
+    const result = await db.query(query, values);
+    return result.rows;
   } catch (err) {
     console.error('Error fetching rooms by hotel rating:', err);
     throw err;
@@ -589,10 +583,11 @@ const getAvailableRoomsByDateRange = async (startDate, endDate) => {
   try {
     const query = `SELECT hr.*
                    FROM hotel_room hr
-                   LEFT JOIN booking b ON hr."room_ID" = b.room_id AND b.check_out > $1 AND b.check_in < $2
-                   WHERE b.room_id IS NULL AND hr.room_status = 'AVAILABLE';`;
-    const result = await db.any(query, [startDate, endDate]);
-    return result;
+                   LEFT JOIN booking b ON hr."room_ID" = b.room_id AND b.check_out > $1::date AND b.check_in < $2::date
+                   WHERE b.room_id IS NULL AND hr.status = true;`;
+    const values = [startDate, endDate];
+    const result = await db.query(query, values);
+    return result.rows;
   } catch (err) {
     console.error('Error fetching available rooms by date range:', err);
     throw err;
@@ -621,10 +616,11 @@ GROUP BY
 
 
 // Get number of available rooms per city
-const getAvailableRoomsPerCity = async () => {
+const getAvailableRoomsPerCity = async (city) => {
   try {
-    const query = 'SELECT * FROM available_rooms_per_city';
-    const { rows } = await db.query(query);
+    const query = 'SELECT * FROM true_rooms_view WHERE "city" = $1;';
+    const values = [`%${city}%`];
+    const { rows } = await db.query(query, values);
     return rows;
   } catch (err) {
     console.error('Error fetching available rooms per city:', err);
@@ -645,7 +641,7 @@ GROUP BY hotel_id;
 // Get total capacity of all rooms of a specific hotel
 const getTotalCapacityPerHotel = async (hotelId) => {
   try {
-    const query = 'SELECT * FROM total_capacity_per_hotel WHERE hotel_Id = $1';
+    const query = `SELECT * FROM true_rooms_view WHERE "hotel_ID" IN (SELECT "hotelID" FROM hotel WHERE address LIKE $1);`
     const { rows } = await db.query(query, [hotelId]);
     return rows;
   } catch (err) {
