@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS public.hotel_room
     damages text COLLATE pg_catalog."default",
     "room_ID" integer NOT NULL,
     "hotel_ID" integer NOT NULL,
-    capacity text COLLATE pg_catalog."default" NOT NULL,
+    capacity integer NOT NULL,
     amenities text[] COLLATE pg_catalog."default",
-    room_status ENUM ('AVAILABLE', 'UNAVAILABLE') DEFAULT 'AVAILABLE',
+    status boolean NOT NULL DEFAULT true,
     CONSTRAINT "Hotel_Room_pkey" PRIMARY KEY ("room_ID"),
     CONSTRAINT price UNIQUE (price),
     CONSTRAINT room_id UNIQUE ("room_ID"),
@@ -21,8 +21,7 @@ CREATE TABLE IF NOT EXISTS public.hotel_room
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
         NOT VALID,
-    CONSTRAINT views CHECK (views = ANY (ARRAY['Mountain'::character varying::text, 'Ocean'::character varying::text, 'City'::character varying::text])) NOT VALID,
-    CONSTRAINT capacity CHECK (capacity = ANY (ARRAY['single'::character varying::text, 'double'::character varying::text, 'triple'::character varying::text])) NOT VALID
+    CONSTRAINT views CHECK (views = ANY (ARRAY['Mountain'::character varying::text, 'Ocean'::character varying::text, 'City'::character varying::text])) NOT VALID
 )
 
 TABLESPACE pg_default;

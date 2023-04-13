@@ -9,9 +9,9 @@ CREATE TABLE IF NOT EXISTS public.hotel
     num_of_rooms integer NOT NULL,
     email text COLLATE pg_catalog."default" NOT NULL,
     rating integer NOT NULL,
+    "chainID" integer NOT NULL,
     phonenum text COLLATE pg_catalog."default",
-    CONSTRAINT "Hotel_pkey" PRIMARY KEY ("hotelID"),
-    CONSTRAINT rating CHECK (rating::text = ANY (ARRAY['one'::character varying::text, 'two'::character varying::text, 'three'::character varying::text, 'four'::character varying::text, 'five'::character varying::text])) NOT VALID
+    CONSTRAINT "Hotel_pkey" PRIMARY KEY ("hotelID")
 )
 
 TABLESPACE pg_default;
